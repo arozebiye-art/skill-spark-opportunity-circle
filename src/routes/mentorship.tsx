@@ -1,7 +1,5 @@
-import { createFileRoute, Link, stripSearchParams } from "@tanstack/react-router";
-import { fallback, zodValidator } from "@tanstack/zod-adapter";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { CalendarCheck, MapPin, Medal } from "lucide-react";
-import { z } from "zod";
 
 import mentorshipImg from "@/assets/mentorship-illustration.webp";
 import { FilterSelect } from "@/components/filter-select";
@@ -11,18 +9,13 @@ import { PersonAvatar } from "@/components/person-avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { FIELDS, mentors } from "@/lib/data";
+import { pickStrings } from "@/lib/search";
 import { filterMentors } from "@/lib/filters";
 
 const defaults = { q: "", field: "" };
 
-const searchSchema = z.object({
-  q: fallback(z.string(), "").default(""),
-  field: fallback(z.string(), "").default(""),
-});
-
 export const Route = createFileRoute("/mentorship")({
-  validateSearch: zodValidator(searchSchema),
-  search: { middlewares: [stripSearchParams(defaults)] },
+  validateSearch: (search: Record<string, unknown>) => pickStrings(search, ["q", "field"] as const),
   head: () => ({
     meta: [
       { title: "Find a mentor – TalentLink" },
@@ -45,7 +38,7 @@ export const Route = createFileRoute("/mentorship")({
 });
 
 function MentorshipPage() {
-  const filters = Route.useSearch();
+  const filters = { ...defaults, ...Route.useSearch() };
   const navigate = Route.useNavigate();
   const results = filterMentors(mentors, filters);
   const mentorFields = FIELDS.filter((f) => mentors.some((m) => m.field === f));

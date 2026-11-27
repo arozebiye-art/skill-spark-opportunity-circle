@@ -1,25 +1,16 @@
-import { createFileRoute, stripSearchParams } from "@tanstack/react-router";
-import { fallback, zodValidator } from "@tanstack/zod-adapter";
-import { z } from "zod";
+import { createFileRoute } from "@tanstack/react-router";
 
 import { FilterSelect } from "@/components/filter-select";
 import { OpportunityCard } from "@/components/opportunity-card";
 import { EmptyState, FilterBar, PageHero, SearchInput } from "@/components/page-parts";
 import { LOCATIONS, OPPORTUNITY_TYPES, WORK_MODES, opportunities } from "@/lib/data";
+import { pickStrings } from "@/lib/search";
 import { filterOpportunities } from "@/lib/filters";
 
 const defaults = { q: "", type: "", location: "", mode: "" };
 
-const searchSchema = z.object({
-  q: fallback(z.string(), "").default(""),
-  type: fallback(z.string(), "").default(""),
-  location: fallback(z.string(), "").default(""),
-  mode: fallback(z.string(), "").default(""),
-});
-
 export const Route = createFileRoute("/opportunities")({
-  validateSearch: zodValidator(searchSchema),
-  search: { middlewares: [stripSearchParams(defaults)] },
+  validateSearch: (search: Record<string, unknown>) => pickStrings(search, ["q", "type", "location", "mode"] as const),
   head: () => ({
     meta: [
       { title: "Jobs, internships and attachments in Kenya – TalentLink" },
@@ -42,7 +33,7 @@ export const Route = createFileRoute("/opportunities")({
 });
 
 function OpportunitiesPage() {
-  const filters = Route.useSearch();
+  const filters = { ...defaults, ...Route.useSearch() };
   const navigate = Route.useNavigate();
   const results = filterOpportunities(opportunities, filters);
 

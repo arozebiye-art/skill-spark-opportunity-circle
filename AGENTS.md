@@ -28,3 +28,9 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Project rules
+- Sample content lives in `src/lib/data.ts`; pages read it directly (no backend yet). Why: lightweight MVP.
+- Sign-in is an in-memory demo session in `src/hooks/use-session.tsx`; swap it for real accounts there. Why: one place to replace.
+- List filters live in the URL via `pickStrings` (`src/lib/search.ts`) with pure filter functions in `src/lib/filters.ts`, tested in `src/test/filters.test.ts`. Why: `@tanstack/zod-adapter` did not infer types with this zod version.
+- Colours, fonts and shadows are tokens in `src/styles.css`; use the `teal` button variant for main actions.
